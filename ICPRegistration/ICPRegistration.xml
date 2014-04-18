@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+  <category>Examples</category>
+  <title>ICPRegistration</title>
+  <description><![CDATA[This is a CLI module that can be bundled in an extension]]></description>
+  <version>0.0.1</version>
+  <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/4.3/Modules/ICPRegistration</documentation-url>
+  <license>Slicer</license>
+  <contributor>Laurent Chauvin (BWH), Junichi Tokuda (BWH)</contributor>
+  <acknowledgements>This work was partially funded by NIH grant 3P41RR013218-12S1</acknowledgements>
+  <parameters>
+    <label>IO</label>
+    <description><![CDATA[Input/output parameters]]></description>
+    <point multiple="true" coordinateSystem="ras">
+      <name>movingPoints</name>
+      <label>Register</label>
+      <longflag>--moving</longflag>
+      <description><![CDATA[Points to register (moving)]]></description>
+      <default>0,0,0</default>
+      <channel>input</channel>
+    </point>
+    <point multiple="true" coordinateSystem="ras">
+      <name>fixedPoints</name>
+      <label>To</label>
+      <longflag>--fixed</longflag>
+      <description><![CDATA[Reference points (fixed)]]></description>
+      <default>0,0,0</default>
+      <channel>input</channel>
+    </point>
+    <transform fileExtensions=".txt" type="linear">
+      <name>registrationTransform</name>
+      <label>Registration Transform</label>
+      <longflag>--registrationTransform</longflag>
+      <description><![CDATA[Output registration transform.]]></description>
+      <channel>output</channel>
+    </transform>
+  </parameters>
+</executable>
