@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
-  <category>Examples</category>
-  <title>ICPRegistration</title>
-  <description><![CDATA[This is a CLI module that can be bundled in an extension]]></description>
+  <category>Registration</category>
+  <title>ICP Registration</title>
+  <description><![CDATA[This is module perform an ICP (Iterative Closest Point) registration between two sets of points]]></description>
   <version>0.0.1</version>
   <documentation-url>http://www.slicer.org/slicerWiki/index.php/Documentation/4.3/Modules/ICPRegistration</documentation-url>
   <license>Slicer</license>
@@ -35,4 +35,16 @@
       <channel>output</channel>
     </transform>
   </parameters>
+
+  <parameters advanced="true">
+    <label>Debug pane</label>
+    <boolean>
+      <name>debugSwitch</name>
+      <label>Debug</label>
+      <description><![CDATA[Click this checkbox to see debugging output.]]></description>
+      <flag>d</flag>
+      <default>false</default>
+    </boolean>
+  </parameters>
+
 </executable>

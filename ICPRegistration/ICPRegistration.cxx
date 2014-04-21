@@ -164,8 +164,11 @@ int main( int argc, char * argv[] )
   registration->SetMovingPointSet(movingPointSet);
 
   // Connect observer
-  //CommandIterationUpdate::Pointer observer = CommandIterationUpdate::New();
-  //optimizer->AddObserver( itk::IterationEvent(), observer );
+  if (debugSwitch)
+    {
+    CommandIterationUpdate::Pointer observer = CommandIterationUpdate::New();
+    optimizer->AddObserver( itk::IterationEvent(), observer );
+    }
 
   try
     {
@@ -178,7 +181,11 @@ int main( int argc, char * argv[] )
     }
 
   ParametersType solution = transform->GetParameters();
-  //std::cout << "Solution = " << solution << std::endl;
+
+  if (debugSwitch)
+    {
+    std::cout << "Solution = " << solution << std::endl;
+    }
 
   // Convert to affine transform
   typedef itk::AffineTransform<double, 3> AffineTransformType;
