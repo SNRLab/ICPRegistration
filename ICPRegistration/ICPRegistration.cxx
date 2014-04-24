@@ -6,6 +6,7 @@
 #include "itkLevenbergMarquardtOptimizer.h"
 #include "itkPointSetToPointSetRegistrationMethod.h"
 #include "itkAffineTransform.h"
+#include "itkTransformFileReader.h"
 
 #include "itkPluginUtilities.h"
 
@@ -39,14 +40,14 @@ public:
   typedef const OptimizerType *                OptimizerPointer;
 
   void Execute(itk::Object *caller, const itk::EventObject & event)
-    {
+  {
     Execute( (const itk::Object *)caller, event);
-    }
+  }
 
   void Execute(const itk::Object * object, const itk::EventObject & event)
-    {
+  {
     OptimizerPointer optimizer =
-                         dynamic_cast< OptimizerPointer >( object );
+      dynamic_cast< OptimizerPointer >( object );
 
     if( ! itk::IterationEvent().CheckEvent( &event ) )
       {
@@ -57,7 +58,7 @@ public:
     std::cout << "Position = "  << optimizer->GetCachedCurrentPosition();
     std::cout << std::endl << std::endl;
 
-    }
+  }
 
 };
 
@@ -70,7 +71,7 @@ int main( int argc, char * argv[] )
   const unsigned int Dimension = 3;
 
   typedef itk::PointSet<float, Dimension> PointSetType;
-  
+
   PointSetType::Pointer fixedPointSet  = PointSetType::New();
   PointSetType::Pointer movingPointSet = PointSetType::New();
 
@@ -106,6 +107,78 @@ int main( int argc, char * argv[] )
     }
   movingPointSet->SetPoints(movingPointContainer);
 
+  // Set up a Transform
+  typedef itk::Euler3DTransform<double> TransformType;
+  TransformType::Pointer transform = TransformType::New();
+
+  // Get Initial transform
+  typedef itk::TransformFileReader TransformReaderType;
+  TransformReaderType::Pointer initTransform;
+
+  if( initialTransform != "" )
+    {
+    initTransform = TransformReaderType::New();
+    initTransform->SetFileName( initialTransform );
+    try
+      {
+      initTransform->Update();
+      }
+    catch( itk::ExceptionObject & err )
+      {
+      std::cerr << err << std::endl;
+      return EXIT_FAILURE;
+      }
+    }
+  else
+    {
+    transform->SetIdentity();
+    }
+
+  if( initialTransform != ""
+      && initTransform->GetTransformList()->size() != 0 )
+    {
+    TransformReaderType::TransformType::Pointer initial
+      = *(initTransform->GetTransformList()->begin() );
+
+    typedef itk::MatrixOffsetTransformBase<double, 3, 3> DoubleMatrixOffsetType;
+    typedef itk::MatrixOffsetTransformBase<float, 3, 3>  FloatMatrixOffsetType;
+
+    DoubleMatrixOffsetType::Pointer da
+      = dynamic_cast<DoubleMatrixOffsetType *>(initial.GetPointer() );
+    FloatMatrixOffsetType::Pointer fa
+      = dynamic_cast<FloatMatrixOffsetType *>(initial.GetPointer() );
+
+    if( da )
+      {
+      vnl_svd<double> svd(da->GetMatrix().GetVnlMatrix() );
+
+      transform->SetMatrix( svd.U() * vnl_transpose(svd.V() ) );
+      transform->SetOffset( da->GetOffset() );
+      }
+    else if( fa )
+      {
+      vnl_matrix<double> t(3, 3);
+      for( int i = 0; i < 3; ++i )
+        {
+        for( int j = 0; j < 3; ++j )
+          {
+          t.put(i, j, fa->GetMatrix().GetVnlMatrix().get(i, j) );
+          }
+        }
+
+      vnl_svd<double> svd( t );
+
+      transform->SetMatrix( svd.U() * vnl_transpose(svd.V() ) );
+      transform->SetOffset( fa->GetOffset() );
+      }
+    else
+      {
+      std::cout << "Initial transform is an unsupported type.\n";
+      }
+
+    std::cout << "Initial transform: "; transform->Print( std::cout );
+    }
+
   // Set up the Metric
   typedef itk::EuclideanDistancePointMetric< PointSetType, PointSetType > MetricType;
   typedef MetricType::TransformType         TransformBaseType;
@@ -116,15 +189,11 @@ int main( int argc, char * argv[] )
 
   MetricType::Pointer metric = MetricType::New();
 
-  // Set up a Transform
-  typedef itk::Euler3DTransform<double> TransformType;
-  TransformType::Pointer transform = TransformType::New();
-
   // Optimizer type
   typedef itk::LevenbergMarquardtOptimizer OptimizerType;
   OptimizerType::Pointer optimizer = OptimizerType::New();
   optimizer->SetUseCostFunctionGradient(false);
-  
+
   // Registration method
   typedef itk::PointSetToPointSetRegistrationMethod< PointSetType, PointSetType > RegistrationType;
   RegistrationType::Pointer registration = RegistrationType::New();
@@ -142,21 +211,14 @@ int main( int argc, char * argv[] )
   scales[5] = 1.0 / translationScale;
 
   // Set up Optimizer
-  unsigned long numberOfIterations = 10000;
-  double        gradientTolerance  = 1e-4; // convergence criterion
-  double        valueTolerance     = 1e-4; // convergence criterion
-  double        epsilonFunction    = 1e-5; // convergence criterion
-
   optimizer->SetScales(scales);
-  optimizer->SetNumberOfIterations(numberOfIterations);
+  optimizer->SetNumberOfIterations(iterations);
   optimizer->SetValueTolerance(valueTolerance);
   optimizer->SetGradientTolerance(gradientTolerance);
   optimizer->SetEpsilonFunction(epsilonFunction);
 
   // Set up registration
-  transform->SetIdentity();
   registration->SetInitialTransformParameters( transform->GetParameters() );
-
   registration->SetMetric(metric);
   registration->SetOptimizer(optimizer);
   registration->SetTransform(transform);
@@ -193,13 +255,13 @@ int main( int argc, char * argv[] )
   affine->SetIdentity();
   affine->SetMatrix(transform->GetMatrix());
   affine->SetOffset(transform->GetOffset());
-  
+
   // Use the inverse of the transform to register moving points to fixed points
   typedef itk::TransformFileWriter TransformWriterType;
   TransformWriterType::Pointer registrationWriter = TransformWriterType::New();
   registrationWriter->SetInput(affine->GetInverseTransform());
   registrationWriter->SetFileName(registrationTransform);
-  
+
   try
     {
     registrationWriter->Update();
@@ -208,7 +270,7 @@ int main( int argc, char * argv[] )
     {
     std::cerr << err << std::endl;
     return EXIT_FAILURE;
-    }  
+    }
 
   return EXIT_SUCCESS;
 }

@@ -27,6 +27,13 @@
       <default>0,0,0</default>
       <channel>input</channel>
     </point>
+    <transform type="linear" fileExtensions=".txt">
+      <name>initialTransform</name>
+      <longflag>--initialTransform</longflag>
+      <description><![CDATA[Initial transform for the registration algorithm]]></description>
+      <label>Initial Transform</label>
+      <channel>input</channel>
+    </transform>
     <transform fileExtensions=".txt" type="linear">
       <name>registrationTransform</name>
       <label>Registration Transform</label>
@@ -34,6 +41,39 @@
       <description><![CDATA[Output registration transform.]]></description>
       <channel>output</channel>
     </transform>
+  </parameters>
+
+  <parameters>
+    <label>Levenberg-Marquardt Optimizer Parameters</label>
+    <description><![CDATA[Levenberg-Marquardt Optimizer Parameters]]></description>
+    <integer>
+      <name>iterations</name>
+      <label>Iterations</label>
+      <longflag>--iterations</longflag>
+      <description><![CDATA[Number of iterations to perform]]></description>
+      <default>2000</default>
+    </integer>
+    <double>
+      <name>gradientTolerance</name>
+      <label>Gradient Tolerance</label>
+      <longflag>--gradTol</longflag>
+      <description><![CDATA[Gradient tolerance is a convergence criterion]]></description>
+      <default>0.0001</default>
+    </double>
+    <double>
+      <name>valueTolerance</name>
+      <label>Value Tolerance</label>
+      <longflag>--valTol</longflag>
+      <description><![CDATA[Value tolerance is a convergence criterion]]></description>
+      <default>0.0001</default>
+    </double>
+    <double>
+      <name>epsilonFunction</name>
+      <label>Epsilon Function</label>
+      <longflag>--epsilon</longflag>
+      <description><![CDATA[Epsilon function is a convergence criterion]]></description>
+      <default>0.00001</default>
+    </double>
   </parameters>
 
   <parameters advanced="true">
