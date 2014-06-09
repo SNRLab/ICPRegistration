@@ -7,6 +7,8 @@
 #include "itkPointSetToPointSetRegistrationMethod.h"
 #include "itkAffineTransform.h"
 #include "itkTransformFileReader.h"
+#include "itkTransformMeshFilter.h"
+#include "itkMesh.h"
 
 #include "itkPluginUtilities.h"
 
@@ -70,7 +72,7 @@ int main( int argc, char * argv[] )
 
   const unsigned int Dimension = 3;
 
-  typedef itk::PointSet<float, Dimension> PointSetType;
+  typedef itk::Mesh<float, Dimension> PointSetType;
 
   PointSetType::Pointer fixedPointSet  = PointSetType::New();
   PointSetType::Pointer movingPointSet = PointSetType::New();
@@ -271,6 +273,56 @@ int main( int argc, char * argv[] )
     std::cerr << err << std::endl;
     return EXIT_FAILURE;
     }
+
+
+  // Compute registration error
+  PointSetType::Pointer movedPointSet;
+  typedef itk::TransformMeshFilter<PointSetType,PointSetType,AffineTransformType> TransformPointSetFilter;
+  TransformPointSetFilter::Pointer transformPointSet = TransformPointSetFilter::New();
+  transformPointSet->SetTransform(affine);
+  transformPointSet->SetInput(movingPointSet);
+  movedPointSet = transformPointSet->GetOutput();
+
+  try
+    {
+    transformPointSet->Update();
+    }
+  catch (itk::ExceptionObject &err)
+    {
+    std::cerr << err << std::endl;
+    return EXIT_FAILURE;
+    }
+
+
+  size_t numberOfMovedPoints = movedPointSet->GetNumberOfPoints();
+  double averageMinDistance = 0.0;
+
+  for (size_t i = 0; i < numberOfMovedPoints; ++i)
+    {
+      PointType movedPoint = movedPointSet->GetPoint(i);
+      double minDistance = 999999.0;
+      for (size_t j = 0; j < numberOfFixedPoints; ++j)
+	{
+	  double currentDistance = std::sqrt(
+	    std::pow(movedPoint[0]+fixedPoints[j][0],2)+
+	    std::pow(movedPoint[1]+fixedPoints[j][1],2)+
+	    std::pow(movedPoint[2]-fixedPoints[j][2],2));
+	  if (currentDistance < minDistance)
+	    {
+	      minDistance = currentDistance;
+	    }
+	}
+      averageMinDistance += minDistance;
+    }
+  averageMinDistance /= numberOfMovedPoints;
+  
+  icpRegistrationError = averageMinDistance;
+
+  std::ofstream rts;
+  rts.open(returnParameterFile.c_str());
+  rts << "icpRegistrationError = " << icpRegistrationError << std::endl;
+  rts.close();
+
 
   return EXIT_SUCCESS;
 }

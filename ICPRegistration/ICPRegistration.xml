@@ -41,6 +41,13 @@
       <description><![CDATA[Output registration transform.]]></description>
       <channel>output</channel>
     </transform>
+    <double>
+      <name>icpRegistrationError</name>
+      <description><![CDATA[[Display ICP Registration Error.]]></description>
+      <label>Registration Error</label>
+      <channel>output</channel>
+      <default>0.0</default>
+    </double>
   </parameters>
 
   <parameters>
