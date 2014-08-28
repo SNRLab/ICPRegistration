@@ -185,9 +185,6 @@ int main( int argc, char * argv[] )
   typedef itk::EuclideanDistancePointMetric< PointSetType, PointSetType > MetricType;
   typedef MetricType::TransformType         TransformBaseType;
   typedef TransformBaseType::ParametersType ParametersType;
-  typedef TransformBaseType::ScalarType     ScalarType;
-  typedef TransformBaseType::JacobianType   JacobianType;
-  typedef TransformBaseType::MatrixType     MatrixType;
 
   MetricType::Pointer metric = MetricType::New();
 
