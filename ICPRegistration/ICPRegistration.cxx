@@ -150,12 +150,15 @@ int main( int argc, char * argv[] )
     FloatMatrixOffsetType::Pointer fa
       = dynamic_cast<FloatMatrixOffsetType *>(initial.GetPointer() );
 
+    // Need to inverse the read transform.
+    // Slicer invert the transform when saving transform to ITK files.
     if( da )
       {
       vnl_svd<double> svd(da->GetMatrix().GetVnlMatrix() );
 
       transform->SetMatrix( svd.U() * vnl_transpose(svd.V() ) );
       transform->SetOffset( da->GetOffset() );
+      da->GetInverse(transform);
       }
     else if( fa )
       {
@@ -172,13 +175,12 @@ int main( int argc, char * argv[] )
 
       transform->SetMatrix( svd.U() * vnl_transpose(svd.V() ) );
       transform->SetOffset( fa->GetOffset() );
+      fa->GetInverse(transform);
       }
     else
       {
       std::cout << "Initial transform is an unsupported type.\n";
       }
-
-    std::cout << "Initial transform: "; transform->Print( std::cout );
     }
 
   // Set up the Metric
@@ -256,6 +258,8 @@ int main( int argc, char * argv[] )
   affine->SetOffset(transform->GetOffset());
 
   // Use the inverse of the transform to register moving points to fixed points
+  // (Slicer will invert the transform when reading the output transform file, so
+  // in order to preserve the transform, it should be inverted before saving it)
   typedef itk::TransformFileWriter TransformWriterType;
   TransformWriterType::Pointer registrationWriter = TransformWriterType::New();
   registrationWriter->SetInput(affine->GetInverseTransform());
