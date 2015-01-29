@@ -91,8 +91,8 @@ int main( int argc, char * argv[] )
   size_t numberOfFixedPoints = fixedPoints.size();
   for (size_t fp = 0; fp < numberOfFixedPoints; ++fp)
     {
-    fixedPoint[0] = -fixedPoints[fp][0];
-    fixedPoint[1] = -fixedPoints[fp][1];
+    fixedPoint[0] = fixedPoints[fp][0];
+    fixedPoint[1] = fixedPoints[fp][1];
     fixedPoint[2] = fixedPoints[fp][2];
     fixedPointContainer->InsertElement(fp,fixedPoint);
     }
@@ -102,8 +102,8 @@ int main( int argc, char * argv[] )
   size_t numberOfMovingPoints = movingPoints.size();
   for (size_t mp = 0; mp < numberOfMovingPoints; ++mp)
     {
-    movingPoint[0] = -movingPoints[mp][0];
-    movingPoint[1] = -movingPoints[mp][1];
+    movingPoint[0] = movingPoints[mp][0];
+    movingPoint[1] = movingPoints[mp][1];
     movingPoint[2] = movingPoints[mp][2];
     movingPointContainer->InsertElement(mp,movingPoint);
     }
@@ -306,8 +306,8 @@ int main( int argc, char * argv[] )
       for (size_t j = 0; j < numberOfFixedPoints; ++j)
 	{
 	  double currentDistance = std::sqrt(
-	    std::pow(movedPoint[0]+fixedPoints[j][0],2)+
-	    std::pow(movedPoint[1]+fixedPoints[j][1],2)+
+	    std::pow(movedPoint[0]-fixedPoints[j][0],2)+
+	    std::pow(movedPoint[1]-fixedPoints[j][1],2)+
 	    std::pow(movedPoint[2]-fixedPoints[j][2],2));
 	  if (currentDistance < minDistance)
 	    {

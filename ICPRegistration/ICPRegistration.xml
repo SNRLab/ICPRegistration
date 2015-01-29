@@ -11,7 +11,7 @@
   <parameters>
     <label>IO</label>
     <description><![CDATA[Input/output parameters]]></description>
-    <point multiple="true" coordinateSystem="ras">
+    <point multiple="true" coordinateSystem="lps">
       <name>movingPoints</name>
       <label>Register</label>
       <longflag>--moving</longflag>
@@ -19,7 +19,7 @@
       <default>0,0,0</default>
       <channel>input</channel>
     </point>
-    <point multiple="true" coordinateSystem="ras">
+    <point multiple="true" coordinateSystem="lps">
       <name>fixedPoints</name>
       <label>To</label>
       <longflag>--fixed</longflag>
