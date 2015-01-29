@@ -111,6 +111,7 @@ int main( int argc, char * argv[] )
 
   // Set up a Transform
   typedef itk::Euler3DTransform<double> TransformType;
+  TransformType::Pointer castTransform = TransformType::New();
   TransformType::Pointer transform = TransformType::New();
 
   // Get Initial transform
@@ -133,6 +134,7 @@ int main( int argc, char * argv[] )
     }
   else
     {
+    castTransform->SetIdentity();
     transform->SetIdentity();
     }
 
@@ -156,9 +158,8 @@ int main( int argc, char * argv[] )
       {
       vnl_svd<double> svd(da->GetMatrix().GetVnlMatrix() );
 
-      transform->SetMatrix( svd.U() * vnl_transpose(svd.V() ) );
-      transform->SetOffset( da->GetOffset() );
-      da->GetInverse(transform);
+      castTransform->SetMatrix( svd.U() * vnl_transpose(svd.V() ) );
+      castTransform->SetOffset( da->GetOffset() );
       }
     else if( fa )
       {
@@ -173,14 +174,14 @@ int main( int argc, char * argv[] )
 
       vnl_svd<double> svd( t );
 
-      transform->SetMatrix( svd.U() * vnl_transpose(svd.V() ) );
-      transform->SetOffset( fa->GetOffset() );
-      fa->GetInverse(transform);
+      castTransform->SetMatrix( svd.U() * vnl_transpose(svd.V() ) );
+      castTransform->SetOffset( fa->GetOffset() );
       }
     else
       {
       std::cout << "Initial transform is an unsupported type.\n";
       }
+    castTransform->GetInverse(transform);
     }
 
   // Set up the Metric
