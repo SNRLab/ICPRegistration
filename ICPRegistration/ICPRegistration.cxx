@@ -77,8 +77,8 @@ int main( int argc, char * argv[] )
   PointSetType::Pointer fixedPointSet  = PointSetType::New();
   PointSetType::Pointer movingPointSet = PointSetType::New();
 
+  typedef itk::Vector< double, 3 > VectorType;
   typedef PointSetType::PointType PointType;
-
   typedef PointSetType::PointsContainer PointsContainer;
 
   PointsContainer::Pointer fixedPointContainer  = PointsContainer::New();
@@ -299,24 +299,26 @@ int main( int argc, char * argv[] )
   size_t numberOfMovedPoints = movedPointSet->GetNumberOfPoints();
   double averageMinDistance = 0.0;
 
-  for (size_t i = 0; i < numberOfMovedPoints; ++i)
+  PointSetType::Pointer smallestSet = (numberOfMovedPoints <= numberOfFixedPoints ? movedPointSet : fixedPointSet);
+  PointSetType::Pointer biggestSet = (numberOfMovedPoints > numberOfFixedPoints ? movedPointSet : fixedPointSet);
+
+  for (size_t i = 0; i < smallestSet->GetNumberOfPoints(); ++i)
     {
-      PointType movedPoint = movedPointSet->GetPoint(i);
-      double minDistance = 999999.0;
-      for (size_t j = 0; j < numberOfFixedPoints; ++j)
+      PointType p1 = smallestSet->GetPoint(i);
+      double minDistance = -1.0;
+      for (size_t j = 0; j < biggestSet->GetNumberOfPoints(); ++j)
 	{
-	  double currentDistance = std::sqrt(
-	    std::pow(movedPoint[0]-fixedPoints[j][0],2)+
-	    std::pow(movedPoint[1]-fixedPoints[j][1],2)+
-	    std::pow(movedPoint[2]-fixedPoints[j][2],2));
-	  if (currentDistance < minDistance)
-	    {
-	      minDistance = currentDistance;
-	    }
+	PointType p2 = biggestSet->GetPoint(j);
+	VectorType p1p2 = p1-p2;
+	double distance = p1p2.GetNorm();
+	if (minDistance < 0 || distance < minDistance)
+	  {
+	  minDistance = distance;
+	  }
 	}
       averageMinDistance += minDistance;
     }
-  averageMinDistance /= numberOfMovedPoints;
+  averageMinDistance /= smallestSet->GetNumberOfPoints();
   
   icpRegistrationError = averageMinDistance;
 
@@ -324,7 +326,6 @@ int main( int argc, char * argv[] )
   rts.open(returnParameterFile.c_str());
   rts << "icpRegistrationError = " << icpRegistrationError << std::endl;
   rts.close();
-
 
   return EXIT_SUCCESS;
 }

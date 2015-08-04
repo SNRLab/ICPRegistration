@@ -41,13 +41,6 @@
       <description><![CDATA[Output registration transform.]]></description>
       <channel>output</channel>
     </transform>
-    <double>
-      <name>icpRegistrationError</name>
-      <description><![CDATA[[Display ICP Registration Error.]]></description>
-      <label>Registration Error</label>
-      <channel>output</channel>
-      <default>0.0</default>
-    </double>
   </parameters>
 
   <parameters>
@@ -80,6 +73,17 @@
       <longflag>--epsilon</longflag>
       <description><![CDATA[Epsilon function is a convergence criterion]]></description>
       <default>0.00001</default>
+    </double>
+  </parameters>
+
+  <parameters>
+    <label>Results</label>
+    <double>
+      <name>icpRegistrationError</name>
+      <description><![CDATA[[Display ICP Registration Error.]]></description>
+      <label>Registration Error</label>
+      <channel>output</channel>
+      <default>0.0</default>
     </double>
   </parameters>
 
